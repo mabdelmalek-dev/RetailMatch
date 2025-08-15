@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Product Recommender</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="/static/style.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Product Recommender</h1>
+      <p class="subtitle">TF-IDF + cosine similarity on product text</p>
+    </header>
+
+    <main class="grid">
+      <!-- Similar Products -->
+      <section class="card">
+        <h2>Find Similar Products</h2>
+        <form id="form-similar" class="form">
+          <div class="row">
+            <label for="pid">Product ID</label>
+            <input id="pid" placeholder='e.g., tv_001' required />
+          </div>
+          <div class="row">
+            <label for="k1">How many</label>
+            <input id="k1" type="number" min="1" max="20" value="5" />
+          </div>
+          <button type="submit">Get Similar</button>
+        </form>
+
+        <div id="similar-results" class="cards"></div>
+        <div id="similar-empty" class="muted" hidden>Enter a product_id and press “Get Similar”.</div>
+      </section>
+
+      <!-- Top in Category -->
+      <section class="card">
+        <h2>Top in Category</h2>
+        <form id="form-top" class="form">
+          <div class="row">
+            <label for="cat">Category</label>
+            <input id="cat" placeholder='e.g., TV or Laptop' required />
+          </div>
+          <div class="row">
+            <label for="k2">How many</label>
+            <input id="k2" type="number" min="1" max="20" value="5" />
+          </div>
+          <button id="getTopBtn" type="submit">Get Top</button>
+        </form>
+
+        <pre id="top-results" class="cards"></pre>
+        <div id="top-empty" class="muted" hidden>Enter a category and press “Get Top”.</div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span class="muted">Demo data lives in <code>data/products.csv</code>. Try IDs like <code>tv_001</code>, categories like <code>TV</code>, <code>Laptop</code>.</span>
+    </footer>
+  </div>
+
+  <script>
+  const $ = (s) => document.querySelector(s);
+
+  async function readResponse(res) {
+    const text = await res.text();
+    try { return [res.ok, JSON.parse(text)]; }
+    catch { return [res.ok, { error: text }]; }
+  }
+
+  // TOP handler — sends proper query string, prevents "/top?"
+  $("#top-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const cat = $("#cat").value.trim();
+    const k = String($("#k2").value || "5").trim();
+
+    const wrap = $("#top-results");
+    const empty = $("#top-empty");
+    wrap.textContent = "";
+    empty.hidden = true;
+
+    if (!cat || !k) {
+      empty.textContent = "Please enter a category and how many results.";
+      empty.hidden = false;
+      return;
+    }
+
+    // Build URL with encoded params
+    const url = `/top?category=${encodeURIComponent(cat)}&k=${encodeURIComponent(k)}`;
+
+    try {
+      const res = await fetch(url);
+      const [ok, data] = await readResponse(res);
+      if (!ok) throw new Error(data.error || "Request failed");
+
+      const items = data.results || [];
+      if (items.length === 0) {
+        empty.textContent = "No items for this category.";
+        empty.hidden = false;
+        return;
+      }
+
+      // Render items (simple JSON for now)
+      wrap.textContent = JSON.stringify(items, null, 2);
+    } catch (err) {
+      empty.textContent = err.message;
+      empty.hidden = false;
+    }
+  });
+</script>
+
+
+    // Similar
+    <script>
+  $("#form-similar").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const pid = $("#pid").value.trim();
+    const k = Number($("#k1").value || 5);
+    const wrap = $("#similar-results");
+    const empty = $("#similar-empty");
+
+    wrap.innerHTML = "";
+    empty.hidden = true;
+
+    try {
+      const res = await fetch(`/similar?product_id=${encodeURIComponent(pid)}&k=${k}`);
+      const [ok, data] = await readResponse(res);
+      if (!ok) throw new Error(data.error || "Request failed");
+
+      const items = data.results || [];
+      if (items.length === 0) {
+        empty.textContent = "No similar items found.";
+        empty.hidden = false;
+        return;
+      }
+
+      items.forEach(item => {
+        const el = document.createElement("div");
+        el.className = "product";
+        el.innerHTML = `
+          <div class="product-title">${item.title ?? "Untitled"}</div>
+          <div class="product-meta">
+            <span><strong>ID:</strong> ${item.product_id ?? "-"}</span>
+            <span><strong>Brand:</strong> ${item.brand ?? "-"}</span>
+            <span><strong>Price:</strong> $${Number(item.price ?? 0).toFixed(2)}</span>
+            <span><strong>Category:</strong> ${item.category ?? "-"}</span>
+          </div>`;
+        wrap.appendChild(el);
+      });
+    } catch (err) {
+      empty.textContent = err.message;
+      empty.hidden = false;
+    }
+  });
+</script>
+
+
+    // Top
+    <script>
+  $("#form-top").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const cat = $("#cat").value.trim();
+    const k = Number($("#k2").value || 5);
+    const wrap = $("#top-results");
+    const empty = $("#top-empty");
+
+    wrap.innerHTML = "";
+    empty.hidden = true;
+
+    try {
+      const res = await fetch(`/top?category=${encodeURIComponent(cat)}&k=${k}`);
+      const [ok, data] = await readResponse(res);
+      if (!ok) throw new Error(data.error || "Request failed");
+
+      const items = data.results || [];
+      if (items.length === 0) {
+        empty.textContent = "No items for this category.";
+        empty.hidden = false;
+        return;
+      }
+
+      items.forEach(item => {
+        const el = document.createElement("div");
+        el.className = "product";
+        el.innerHTML = `
+          <div class="product-title">${item.title ?? "Untitled"}</div>
+          <div class="product-meta">
+            <span><strong>ID:</strong> ${item.product_id ?? "-"}</span>
+            <span><strong>Brand:</strong> ${item.brand ?? "-"}</span>
+            <span><strong>Price:</strong> $${Number(item.price ?? 0).toFixed(2)}</span>
+            <span><strong>Category:</strong> ${item.category ?? "-"}</span>
+          </div>`;
+        wrap.appendChild(el);
+      });
+    } catch (err) {
+      empty.textContent = err.message;
+      empty.hidden = false;
+    }
+  });
+</script>
+
+</body>
+</html>

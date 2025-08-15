@@ -1,0 +1,11 @@
+﻿product_id,title,category,brand,price,features_text
+tv_001,4K UHD Smart TV 55",TV,Sony,699.99,"4K UHD; HDR10; 120Hz; HDMI x4; Google TV"
+tv_002,OLED TV 65",TV,LG,1599.00,"OLED; 4K; Dolby Vision; 120Hz; WebOS"
+lap_010,14-inch Laptop,Laptop,HP,649.00,"Intel i5; 8GB RAM; 256GB SSD; Windows 11; Wi-Fi 6"
+lap_011,15-inch Gaming Laptop,Laptop,ASUS,1199.00,"Ryzen 7; 16GB RAM; RTX 4060; 512GB SSD; 144Hz"
+hp_020,Over-Ear Headphones,Headphones,Sony,199.99,"Noise cancelling; Bluetooth 5.2; 30h battery; USB-C"
+hp_021,Wireless Earbuds,Headphones,Apple,249.00,"ANC; Transparency mode; Spatial audio; MagSafe"
+cam_030,Mirrorless Camera,Camera,Canon,999.00,"24MP; 4K video; Dual Pixel AF; Wi-Fi; EF-M mount"
+spk_040,Smart Speaker,Smart Home,Amazon,99.99,"Alexa; Wi-Fi; Bluetooth; Multi-room; Voice control"
+mon_050,27-inch Monitor,Monitor,Dell,229.99,"1080p; IPS; 75Hz; HDMI/DP; Slim bezel"
+kb_060,Mechanical Keyboard,Accessories,Logitech,129.99,"Tactile switches; RGB; USB-C; NKRO; Software"
